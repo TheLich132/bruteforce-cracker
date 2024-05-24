@@ -1,5 +1,4 @@
 use memmap2::Mmap;
-use num_cpus;
 use password_encryptor::{EncryptionData, PasswordEncryptor};
 use rayon::prelude::*;
 use std::fs::File;
@@ -43,7 +42,7 @@ pub fn hash_password(password: &str, salt: &str) {
     exit(0);
 }
 
-fn crack_password(hashed_password_file: &str, passwords_database: &str, mut n_threads: i32) -> () {
+fn crack_password(hashed_password_file: &str, passwords_database: &str, mut n_threads: i32) {
     // load hashed password from file
     let hashed_password: String = fs::read_to_string(hashed_password_file).expect("Unable to read file");
 
@@ -82,7 +81,7 @@ fn crack_password(hashed_password_file: &str, passwords_database: &str, mut n_th
     let i: i32 = 0;
     let mutex_i: Mutex<i32> = Mutex::new(i);
 
-    let _ = map.par_iter().for_each(|&password| {
+    map.par_iter().for_each(|&password| {
         if let Ok(password_) = std::str::from_utf8(password) {
             let encryptor: PasswordEncryptor = PasswordEncryptor::new(KEY, Some(prefix.as_str()));
             let data: EncryptionData = EncryptionData {
